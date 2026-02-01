@@ -250,6 +250,13 @@ def cmd_set_config(
     short_break_sec: int | None = None,
     long_break_sec: int | None = None,
     cycles_before_long_break: int | None = None,
+    day_start_hour: int | None = None,
+    day_start_min: int | None = None,
+    day_end_hour: int | None = None,
+    day_end_min: int | None = None,
+    lunch_hour: int | None = None,
+    lunch_min: int | None = None,
+    lunch_duration_min: int | None = None,
 ) -> dict:
     global _config
     if work_sec is not None:
@@ -260,12 +267,30 @@ def cmd_set_config(
         _config.long_break_sec = long_break_sec
     if cycles_before_long_break is not None:
         _config.cycles_before_long_break = cycles_before_long_break
+    if day_start_hour is not None:
+        _config.day_start_hour = day_start_hour
+    if day_start_min is not None:
+        _config.day_start_min = day_start_min
+    if day_end_hour is not None:
+        _config.day_end_hour = day_end_hour
+    if day_end_min is not None:
+        _config.day_end_min = day_end_min
+    if lunch_hour is not None:
+        _config.lunch_hour = lunch_hour
+    if lunch_min is not None:
+        _config.lunch_min = lunch_min
+    if lunch_duration_min is not None:
+        _config.lunch_duration_min = lunch_duration_min
 
     _state.cycles_before_long_break = _config.cycles_before_long_break
     db.save_config(_config)
     _emit("config_updated", _config.to_dict())
     _save()
     return _state.to_dict()
+
+
+def get_config() -> dict:
+    return _config.to_dict()
 
 
 def add_note(message: str) -> Event:
