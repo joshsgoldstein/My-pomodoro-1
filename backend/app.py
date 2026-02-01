@@ -55,13 +55,6 @@ CMD_DISPATCH = {
         short_break_sec=body.get("short_break_sec"),
         long_break_sec=body.get("long_break_sec"),
         cycles_before_long_break=body.get("cycles_before_long_break"),
-        day_start_hour=body.get("day_start_hour"),
-        day_start_min=body.get("day_start_min"),
-        day_end_hour=body.get("day_end_hour"),
-        day_end_min=body.get("day_end_min"),
-        lunch_hour=body.get("lunch_hour"),
-        lunch_min=body.get("lunch_min"),
-        lunch_duration_min=body.get("lunch_duration_min"),
     ),
 }
 

@@ -2,6 +2,7 @@ const timerEl = document.getElementById("timer");
 const modeEl = document.getElementById("mode-label");
 const statusEl = document.getElementById("status-label");
 const cycleEl = document.getElementById("cycle-label");
+const pomodoroCountEl = document.getElementById("pomodoro-count");
 const intentEl = document.getElementById("intent-label");
 const intentInput = document.getElementById("intent-input");
 const noteInput = document.getElementById("note-input");
@@ -16,13 +17,16 @@ let currentStatus = "stopped";
 let currentCycleIndex = 1;
 let currentCyclesBeforeLong = 4;
 
-// Cached config for timeline generation
-let cachedConfig = null;
-
 function fmt(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+function fmt12h(h, m) {
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  return h12 + ":" + String(m).padStart(2, "0") + " " + ampm;
 }
 
 function modeDisplay(mode) {
@@ -143,13 +147,23 @@ async function pollState() {
 
 // --- Events ---
 
+function fmtEventTime(ts) {
+  // ts is ISO like "2025-01-01T14:30:45..."
+  const h = parseInt(ts.substring(11, 13), 10);
+  const m = ts.substring(14, 16);
+  const s = ts.substring(17, 19);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  return h12 + ":" + m + ":" + s + " " + ampm;
+}
+
 async function loadEvents() {
   try {
     const events = await api("GET", "/events?limit=50");
     eventList.innerHTML = "";
     for (const ev of events) {
       const li = document.createElement("li");
-      const time = ev.ts.substring(11, 19);
+      const time = fmtEventTime(ev.ts);
       let detail = "";
       if (ev.type === "distraction") {
         detail = ev.payload.message || "";
@@ -181,7 +195,7 @@ document.getElementById("btn-distraction").addEventListener("click", async () =>
   }
   await api("POST", "/distractions", { message: msg });
   distractionInput.value = "";
-  loadDistractionCount();
+  loadTodayStats();
   loadEvents();
 });
 
@@ -189,10 +203,14 @@ distractionInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") document.getElementById("btn-distraction").click();
 });
 
-async function loadDistractionCount() {
+// --- Today stats (pomodoro count + distraction count) ---
+
+async function loadTodayStats() {
   try {
     const data = await api("GET", "/today");
     distractionCountEl.textContent = data.distractions_count || 0;
+    const count = data.work_sessions_completed || 0;
+    pomodoroCountEl.textContent = count + " pomodoro" + (count !== 1 ? "s" : "") + " today";
   } catch (e) { /* ignore */ }
 }
 
@@ -217,42 +235,6 @@ const cfgWork = document.getElementById("cfg-work");
 const cfgShortBreak = document.getElementById("cfg-short-break");
 const cfgLongBreak = document.getElementById("cfg-long-break");
 const cfgCycles = document.getElementById("cfg-cycles");
-const cfgDayStart = document.getElementById("cfg-day-start");
-const cfgDayEnd = document.getElementById("cfg-day-end");
-const cfgLunchTime = document.getElementById("cfg-lunch-time");
-const cfgLunchDuration = document.getElementById("cfg-lunch-duration");
-
-// Populate time dropdowns with 15-min increments (5:00 - 23:00)
-function populateTimeSelect(selectEl, startHour, endHour) {
-  selectEl.innerHTML = "";
-  for (let h = startHour; h <= endHour; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === endHour && m > 0) break;
-      const opt = document.createElement("option");
-      const val = h * 60 + m;
-      opt.value = val;
-      opt.textContent = pad2(h) + ":" + pad2(m);
-      selectEl.appendChild(opt);
-    }
-  }
-}
-
-function setTimeSelectValue(selectEl, hour, min) {
-  // Snap to nearest 15-min
-  const snapped = Math.round(min / 15) * 15;
-  const val = hour * 60 + (snapped >= 60 ? 0 : snapped);
-  selectEl.value = val;
-}
-
-function getTimeSelectValue(selectEl) {
-  const val = parseInt(selectEl.value, 10);
-  return { hour: Math.floor(val / 60), min: val % 60 };
-}
-
-// Init time dropdowns
-populateTimeSelect(cfgDayStart, 5, 23);
-populateTimeSelect(cfgDayEnd, 5, 23);
-populateTimeSelect(cfgLunchTime, 5, 23);
 
 document.getElementById("btn-settings-toggle").addEventListener("click", () => {
   settingsPanel.classList.toggle("hidden");
@@ -262,166 +244,50 @@ document.getElementById("btn-settings-toggle").addEventListener("click", () => {
 async function loadConfig() {
   try {
     const cfg = await api("GET", "/config");
-    cachedConfig = cfg;
     cfgWork.value = Math.round(cfg.work_sec / 60);
     cfgShortBreak.value = Math.round(cfg.short_break_sec / 60);
     cfgLongBreak.value = Math.round(cfg.long_break_sec / 60);
     cfgCycles.value = cfg.cycles_before_long_break;
-    setTimeSelectValue(cfgDayStart, cfg.day_start_hour, cfg.day_start_min);
-    setTimeSelectValue(cfgDayEnd, cfg.day_end_hour, cfg.day_end_min);
-    setTimeSelectValue(cfgLunchTime, cfg.lunch_hour, cfg.lunch_min);
-    cfgLunchDuration.value = cfg.lunch_duration_min;
   } catch (e) { /* ignore */ }
 }
 
 document.getElementById("btn-save-config").addEventListener("click", async () => {
-  const dayStart = getTimeSelectValue(cfgDayStart);
-  const dayEnd = getTimeSelectValue(cfgDayEnd);
-  const lunchTime = getTimeSelectValue(cfgLunchTime);
-
   await api("POST", "/cmd", {
     type: "set_config",
     work_sec: (parseInt(cfgWork.value, 10) || 25) * 60,
     short_break_sec: (parseInt(cfgShortBreak.value, 10) || 5) * 60,
     long_break_sec: (parseInt(cfgLongBreak.value, 10) || 15) * 60,
     cycles_before_long_break: parseInt(cfgCycles.value, 10) || 4,
-    day_start_hour: dayStart.hour,
-    day_start_min: dayStart.min,
-    day_end_hour: dayEnd.hour,
-    day_end_min: dayEnd.min,
-    lunch_hour: lunchTime.hour,
-    lunch_min: lunchTime.min,
-    lunch_duration_min: parseInt(cfgLunchDuration.value, 10) || 60,
   });
   settingsPanel.classList.add("hidden");
-  // Reload config and rebuild timeline
-  cachedConfig = null;
   refresh();
 });
 
-// --- Generate schedule blocks from config ---
-
-function generateScheduleBlocks(cfg) {
-  const blocks = [];
-  const workMin = Math.round(cfg.work_sec / 60);
-  const shortBreakMin = Math.round(cfg.short_break_sec / 60);
-  const longBreakMin = Math.round(cfg.long_break_sec / 60);
-  const cyclesBeforeLong = cfg.cycles_before_long_break;
-
-  const dayStartMin = cfg.day_start_hour * 60 + cfg.day_start_min;
-  const dayEndMin = cfg.day_end_hour * 60 + cfg.day_end_min;
-  const lunchStartMin = cfg.lunch_hour * 60 + cfg.lunch_min;
-  const lunchEndMin = lunchStartMin + cfg.lunch_duration_min;
-
-  // Add lunch block
-  blocks.push({
-    startMin: lunchStartMin,
-    durationMin: cfg.lunch_duration_min,
-    mode: "lunch",
-  });
-
-  let cursor = dayStartMin;
-  let cycle = 0;
-
-  while (cursor + workMin <= dayEndMin) {
-    // If work block would overlap lunch, skip to after lunch
-    if (cursor < lunchEndMin && cursor + workMin > lunchStartMin) {
-      cursor = lunchEndMin;
-      continue;
-    }
-    if (cursor >= dayEndMin) break;
-
-    // Work block
-    const workEnd = Math.min(cursor + workMin, dayEndMin);
-    blocks.push({
-      startMin: cursor,
-      durationMin: workEnd - cursor,
-      mode: "work",
-    });
-    cursor = workEnd;
-    cycle++;
-
-    if (cursor >= dayEndMin) break;
-
-    // Break block
-    let breakMin;
-    if (cycle % cyclesBeforeLong === 0) {
-      breakMin = longBreakMin;
-    } else {
-      breakMin = shortBreakMin;
-    }
-
-    // If break would overlap lunch, skip to after lunch
-    if (cursor < lunchEndMin && cursor + breakMin > lunchStartMin) {
-      cursor = lunchEndMin;
-      continue;
-    }
-
-    const breakEnd = Math.min(cursor + breakMin, dayEndMin);
-    if (breakEnd > cursor) {
-      blocks.push({
-        startMin: cursor,
-        durationMin: breakEnd - cursor,
-        mode: cycle % cyclesBeforeLong === 0 ? "long_break" : "short_break",
-      });
-      cursor = breakEnd;
-    }
-  }
-
-  return blocks;
-}
-
-// --- Vertical day timeline ---
+// --- Vertical day timeline (actual sessions only) ---
 
 const HOUR_HEIGHT = 60; // px per hour
+const TIMELINE_START_HOUR = 6;
+const TIMELINE_END_HOUR = 22;
 
-function buildTimeline(events, cfg) {
+function buildTimeline(events) {
   const now = new Date();
   timelineEl.innerHTML = "";
 
-  const timelineStartHour = cfg.day_start_hour;
-  // End at least 1 hour after day_end, snapped up
-  const timelineEndHour = Math.min(23, cfg.day_end_hour + 1);
-  const totalHours = timelineEndHour - timelineStartHour;
+  const totalHours = TIMELINE_END_HOUR - TIMELINE_START_HOUR;
   timelineEl.style.height = (totalHours * HOUR_HEIGHT) + "px";
 
   // Hour grid lines and labels
-  for (let h = timelineStartHour; h <= timelineEndHour; h++) {
+  for (let h = TIMELINE_START_HOUR; h <= TIMELINE_END_HOUR; h++) {
     const line = document.createElement("div");
     line.className = "tl-hour-line";
-    line.style.top = ((h - timelineStartHour) * HOUR_HEIGHT) + "px";
+    line.style.top = ((h - TIMELINE_START_HOUR) * HOUR_HEIGHT) + "px";
     timelineEl.appendChild(line);
 
     const label = document.createElement("span");
     label.className = "tl-hour-label";
-    label.style.top = ((h - timelineStartHour) * HOUR_HEIGHT) + "px";
-    label.textContent = pad2(h) + ":00";
+    label.style.top = ((h - TIMELINE_START_HOUR) * HOUR_HEIGHT) + "px";
+    label.textContent = fmt12h(h, 0);
     timelineEl.appendChild(label);
-  }
-
-  // Schedule blocks (auto-generated from config)
-  const scheduleBlocks = generateScheduleBlocks(cfg);
-  for (const bl of scheduleBlocks) {
-    const top = ((bl.startMin / 60) - timelineStartHour) * HOUR_HEIGHT;
-    const height = (bl.durationMin / 60) * HOUR_HEIGHT;
-    if (top < 0 || top >= totalHours * HOUR_HEIGHT) continue;
-
-    const block = document.createElement("div");
-    block.className = "tl-sched tl-sched-" + bl.mode;
-    block.style.top = Math.max(0, top) + "px";
-    block.style.height = Math.max(4, height) + "px";
-
-    const text = document.createElement("span");
-    text.className = "tl-sched-text";
-    if (bl.mode === "lunch") {
-      text.textContent = "Lunch";
-    } else if (bl.mode === "work") {
-      text.textContent = bl.durationMin + "m work";
-    } else {
-      text.textContent = bl.durationMin + "m " + modeDisplay(bl.mode);
-    }
-    block.appendChild(text);
-    timelineEl.appendChild(block);
   }
 
   // Actual session blocks
@@ -429,7 +295,7 @@ function buildTimeline(events, cfg) {
   for (const sp of spans) {
     const startMin = sp.start.getHours() * 60 + sp.start.getMinutes();
     const endMin = sp.end.getHours() * 60 + sp.end.getMinutes();
-    const top = ((startMin / 60) - timelineStartHour) * HOUR_HEIGHT;
+    const top = ((startMin / 60) - TIMELINE_START_HOUR) * HOUR_HEIGHT;
     const height = Math.max(3, ((endMin - startMin) / 60) * HOUR_HEIGHT);
     if (top < 0) continue;
 
@@ -437,15 +303,24 @@ function buildTimeline(events, cfg) {
     block.className = "tl-session tl-session-" + (sp.mode || "work");
     block.style.top = top + "px";
     block.style.height = height + "px";
+
+    // Label inside the block
+    const text = document.createElement("span");
+    text.className = "tl-session-text";
+    const startLabel = fmt12h(sp.start.getHours(), sp.start.getMinutes());
+    const dur = Math.round((endMin - startMin));
+    text.textContent = modeDisplay(sp.mode || "work") + " " + dur + "m";
+    block.appendChild(text);
+
     block.title = modeDisplay(sp.mode || "work") + " " +
-      sp.start.toTimeString().substring(0, 5) + "-" +
-      sp.end.toTimeString().substring(0, 5);
+      fmt12h(sp.start.getHours(), sp.start.getMinutes()) + " - " +
+      fmt12h(sp.end.getHours(), sp.end.getMinutes());
     timelineEl.appendChild(block);
   }
 
   // Now marker
   const nowMin = now.getHours() * 60 + now.getMinutes();
-  const nowTop = ((nowMin / 60) - timelineStartHour) * HOUR_HEIGHT;
+  const nowTop = ((nowMin / 60) - TIMELINE_START_HOUR) * HOUR_HEIGHT;
   if (nowTop >= 0 && nowTop <= totalHours * HOUR_HEIGHT) {
     const marker = document.createElement("div");
     marker.className = "tl-now";
@@ -487,12 +362,8 @@ function buildSpans(events, now) {
 
 async function loadTimeline() {
   try {
-    // Load config if not cached
-    if (!cachedConfig) {
-      cachedConfig = await api("GET", "/config");
-    }
     const events = await api("GET", "/events?limit=200");
-    buildTimeline(events, cachedConfig);
+    buildTimeline(events);
   } catch (e) { /* ignore */ }
 }
 
@@ -501,7 +372,7 @@ async function loadTimeline() {
 function refresh() {
   loadEvents();
   loadTimeline();
-  loadDistractionCount();
+  loadTodayStats();
 }
 
 // --- Init ---

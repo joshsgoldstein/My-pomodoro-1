@@ -16,7 +16,6 @@
       </div>
 
       <div id="settings-panel" class="settings-panel hidden">
-        <h3 class="settings-section-title">Timer</h3>
         <div class="settings-row">
           <label for="cfg-work">Work (min)</label>
           <input type="number" id="cfg-work" min="1" max="120" />
@@ -33,30 +32,6 @@
           <label for="cfg-cycles">Cycles before long break</label>
           <input type="number" id="cfg-cycles" min="1" max="20" />
         </div>
-
-        <h3 class="settings-section-title">Schedule</h3>
-        <div class="settings-row">
-          <label>Work hours</label>
-          <div class="time-range">
-            <select id="cfg-day-start"></select>
-            <span>to</span>
-            <select id="cfg-day-end"></select>
-          </div>
-        </div>
-        <div class="settings-row">
-          <label>Lunch</label>
-          <div class="time-range">
-            <select id="cfg-lunch-time"></select>
-            <span>for</span>
-            <select id="cfg-lunch-duration">
-              <option value="30">30 min</option>
-              <option value="45">45 min</option>
-              <option value="60">60 min</option>
-              <option value="90">90 min</option>
-            </select>
-          </div>
-        </div>
-
         <button id="btn-save-config">Save</button>
       </div>
 
@@ -64,6 +39,7 @@
       <div id="mode-label" class="mode-label">idle</div>
       <div id="status-label" class="status-label">stopped</div>
       <div id="cycle-label" class="cycle-label">Cycle 1</div>
+      <div id="pomodoro-count" class="pomodoro-count"></div>
       <div id="intent-label" class="intent-label"></div>
 
       <div class="controls">

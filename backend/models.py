@@ -12,15 +12,6 @@ DEFAULT_SHORT_BREAK_SEC = 300
 DEFAULT_LONG_BREAK_SEC = 900
 DEFAULT_CYCLES_BEFORE_LONG_BREAK = 4
 
-# Schedule defaults (9-to-5 workday, lunch at noon)
-DEFAULT_DAY_START_HOUR = 9
-DEFAULT_DAY_START_MIN = 0
-DEFAULT_DAY_END_HOUR = 17
-DEFAULT_DAY_END_MIN = 0
-DEFAULT_LUNCH_HOUR = 12
-DEFAULT_LUNCH_MIN = 0
-DEFAULT_LUNCH_DURATION_MIN = 60
-
 
 @dataclass
 class Config:
@@ -28,13 +19,6 @@ class Config:
     short_break_sec: int = DEFAULT_SHORT_BREAK_SEC
     long_break_sec: int = DEFAULT_LONG_BREAK_SEC
     cycles_before_long_break: int = DEFAULT_CYCLES_BEFORE_LONG_BREAK
-    day_start_hour: int = DEFAULT_DAY_START_HOUR
-    day_start_min: int = DEFAULT_DAY_START_MIN
-    day_end_hour: int = DEFAULT_DAY_END_HOUR
-    day_end_min: int = DEFAULT_DAY_END_MIN
-    lunch_hour: int = DEFAULT_LUNCH_HOUR
-    lunch_min: int = DEFAULT_LUNCH_MIN
-    lunch_duration_min: int = DEFAULT_LUNCH_DURATION_MIN
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -46,13 +30,6 @@ class Config:
             short_break_sec=d.get("short_break_sec", DEFAULT_SHORT_BREAK_SEC),
             long_break_sec=d.get("long_break_sec", DEFAULT_LONG_BREAK_SEC),
             cycles_before_long_break=d.get("cycles_before_long_break", DEFAULT_CYCLES_BEFORE_LONG_BREAK),
-            day_start_hour=d.get("day_start_hour", DEFAULT_DAY_START_HOUR),
-            day_start_min=d.get("day_start_min", DEFAULT_DAY_START_MIN),
-            day_end_hour=d.get("day_end_hour", DEFAULT_DAY_END_HOUR),
-            day_end_min=d.get("day_end_min", DEFAULT_DAY_END_MIN),
-            lunch_hour=d.get("lunch_hour", DEFAULT_LUNCH_HOUR),
-            lunch_min=d.get("lunch_min", DEFAULT_LUNCH_MIN),
-            lunch_duration_min=d.get("lunch_duration_min", DEFAULT_LUNCH_DURATION_MIN),
         )
 
 

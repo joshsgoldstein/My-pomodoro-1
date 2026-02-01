@@ -162,6 +162,13 @@ body {
   margin-bottom: 0.15rem;
 }
 
+.pomodoro-count {
+  font-size: 0.85rem;
+  color: #8888cc;
+  margin-bottom: 0.15rem;
+  min-height: 1.2em;
+}
+
 .intent-label {
   font-size: 0.95rem;
   color: #cc8844;
@@ -323,48 +330,6 @@ h2 {
   color: #aaa;
 }
 
-/* --- Settings section titles --- */
-
-.settings-section-title {
-  font-size: 0.8rem;
-  color: #8888cc;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0.75rem 0 0.5rem 0;
-  border-top: 1px solid #333;
-  padding-top: 0.6rem;
-}
-
-.settings-section-title:first-child {
-  margin-top: 0;
-  border-top: none;
-  padding-top: 0;
-}
-
-/* --- Time dropdowns --- */
-
-.time-range {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.time-range span {
-  color: #666;
-  font-size: 0.8rem;
-}
-
-.settings-row select {
-  padding: 0.3rem 0.4rem;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background: #1a1a2e;
-  color: #e0e0e0;
-  font-size: 0.8rem;
-  cursor: pointer;
-  appearance: auto;
-}
-
 /* --- Vertical day timeline --- */
 
 .timeline {
@@ -376,7 +341,7 @@ h2 {
 
 .tl-hour-line {
   position: absolute;
-  left: 40px;
+  left: 58px;
   right: 0;
   height: 1px;
   background: #222;
@@ -385,17 +350,18 @@ h2 {
 .tl-hour-label {
   position: absolute;
   left: 0;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #555;
   transform: translateY(-50%);
   user-select: none;
+  white-space: nowrap;
 }
 
-/* Schedule blocks (auto-generated from config) */
+/* Session blocks */
 
-.tl-sched {
+.tl-session {
   position: absolute;
-  left: 44px;
+  left: 62px;
   right: 4px;
   border-radius: 4px;
   overflow: hidden;
@@ -404,58 +370,12 @@ h2 {
   padding: 0 6px;
 }
 
-.tl-sched-text {
+.tl-session-text {
   font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.tl-sched-work {
-  background: rgba(27, 138, 46, 0.15);
-  border: 1px solid rgba(27, 138, 46, 0.3);
-}
-
-.tl-sched-work .tl-sched-text {
-  color: rgba(27, 138, 46, 0.6);
-}
-
-.tl-sched-short_break {
-  background: rgba(15, 52, 96, 0.15);
-  border: 1px solid rgba(15, 52, 96, 0.3);
-}
-
-.tl-sched-short_break .tl-sched-text {
-  color: rgba(100, 140, 200, 0.5);
-}
-
-.tl-sched-long_break {
-  background: rgba(74, 32, 128, 0.15);
-  border: 1px solid rgba(74, 32, 128, 0.3);
-}
-
-.tl-sched-long_break .tl-sched-text {
-  color: rgba(140, 100, 200, 0.5);
-}
-
-.tl-sched-lunch {
-  background: rgba(204, 136, 68, 0.12);
-  border: 1px dashed rgba(204, 136, 68, 0.35);
-}
-
-.tl-sched-lunch .tl-sched-text {
-  color: rgba(204, 136, 68, 0.6);
-}
-
-/* Actual session blocks (overlaid on top of schedule) */
-
-.tl-session {
-  position: absolute;
-  left: 44px;
-  right: 4px;
-  border-radius: 3px;
-  opacity: 0.85;
-  z-index: 2;
 }
 
 .tl-session-work {
@@ -474,7 +394,7 @@ h2 {
 
 .tl-now {
   position: absolute;
-  left: 36px;
+  left: 54px;
   right: 0;
   height: 2px;
   background: #e05050;
