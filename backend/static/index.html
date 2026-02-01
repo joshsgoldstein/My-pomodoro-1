@@ -7,55 +7,88 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Pomodoro</h1>
-      <button id="btn-settings-toggle" class="settings-toggle" title="Settings">&#9881;</button>
-    </div>
-
-    <div id="settings-panel" class="settings-panel hidden">
-      <div class="settings-row">
-        <label for="cfg-work">Work (min)</label>
-        <input type="number" id="cfg-work" min="1" max="120" />
+  <div class="layout">
+    <!-- LEFT: Timer & controls -->
+    <div class="col-timer">
+      <div class="header">
+        <h1>Pomodoro</h1>
+        <button id="btn-settings-toggle" class="settings-toggle" title="Settings">&#9881;</button>
       </div>
-      <div class="settings-row">
-        <label for="cfg-short-break">Short break (min)</label>
-        <input type="number" id="cfg-short-break" min="1" max="60" />
+
+      <div id="settings-panel" class="settings-panel hidden">
+        <div class="settings-row">
+          <label for="cfg-work">Work (min)</label>
+          <input type="number" id="cfg-work" min="1" max="120" />
+        </div>
+        <div class="settings-row">
+          <label for="cfg-short-break">Short break (min)</label>
+          <input type="number" id="cfg-short-break" min="1" max="60" />
+        </div>
+        <div class="settings-row">
+          <label for="cfg-long-break">Long break (min)</label>
+          <input type="number" id="cfg-long-break" min="1" max="60" />
+        </div>
+        <div class="settings-row">
+          <label for="cfg-cycles">Cycles before long break</label>
+          <input type="number" id="cfg-cycles" min="1" max="20" />
+        </div>
+        <button id="btn-save-config">Save</button>
       </div>
-      <div class="settings-row">
-        <label for="cfg-long-break">Long break (min)</label>
-        <input type="number" id="cfg-long-break" min="1" max="60" />
+
+      <div id="timer" class="timer">00:00</div>
+      <div id="mode-label" class="mode-label">idle</div>
+      <div id="status-label" class="status-label">stopped</div>
+      <div id="cycle-label" class="cycle-label">Cycle 1</div>
+      <div id="intent-label" class="intent-label"></div>
+
+      <div class="controls">
+        <input type="text" id="intent-input" placeholder="Intent (optional)" />
+        <div id="buttons" class="buttons"></div>
       </div>
-      <div class="settings-row">
-        <label for="cfg-cycles">Cycles before long break</label>
-        <input type="number" id="cfg-cycles" min="1" max="20" />
+
+      <div class="distraction-section">
+        <input type="text" id="distraction-input" placeholder="What distracted you?" />
+        <button id="btn-distraction">Distraction</button>
+        <span id="distraction-count" class="distraction-count">0</span>
       </div>
-      <button id="btn-save-config">Save</button>
+
+      <div class="note-section">
+        <input type="text" id="note-input" placeholder="Add a note..." />
+        <button id="btn-note">Add Note</button>
+      </div>
+
+      <h2>History</h2>
+      <ul id="event-list" class="event-list"></ul>
     </div>
 
-    <div id="timer" class="timer">00:00</div>
-    <div id="mode-label" class="mode-label">idle</div>
-    <div id="status-label" class="status-label">stopped</div>
-    <div id="cycle-label" class="cycle-label">Cycle 1</div>
-    <div id="intent-label" class="intent-label"></div>
+    <!-- RIGHT: Day timeline & planner -->
+    <div class="col-plan">
+      <div class="plan-header">
+        <h2>Today</h2>
+        <button id="btn-add-plan" class="btn-add-plan" title="Add planned slot">+ Plan</button>
+      </div>
 
-    <div class="controls">
-      <input type="text" id="intent-input" placeholder="Intent (optional)" />
-      <div id="buttons" class="buttons"></div>
+      <div id="add-plan-form" class="add-plan-form hidden">
+        <div class="plan-form-row">
+          <label>Time</label>
+          <input type="number" id="plan-hour" min="0" max="23" placeholder="HH" />
+          <span>:</span>
+          <input type="number" id="plan-min" min="0" max="59" placeholder="MM" value="0" />
+        </div>
+        <div class="plan-form-row">
+          <label>Duration</label>
+          <input type="number" id="plan-duration" min="5" max="120" value="25" />
+          <span>min</span>
+        </div>
+        <div class="plan-form-row">
+          <label>Intent</label>
+          <input type="text" id="plan-intent" placeholder="What to work on" />
+        </div>
+        <button id="btn-save-plan">Add</button>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
     </div>
-
-    <div class="distraction-section">
-      <button id="btn-distraction">Distraction</button>
-      <span id="distraction-count" class="distraction-count">0</span>
-    </div>
-
-    <div class="note-section">
-      <input type="text" id="note-input" placeholder="Add a note..." />
-      <button id="btn-note">Add Note</button>
-    </div>
-
-    <h2>History</h2>
-    <ul id="event-list" class="event-list"></ul>
   </div>
 
   <script src="/app.js"></script>

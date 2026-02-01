@@ -32,6 +32,17 @@ def init_db() -> None:
         "  payload TEXT NOT NULL"
         ")"
     )
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS plans ("
+        "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "  date TEXT NOT NULL,"
+        "  start_hour INTEGER NOT NULL,"
+        "  start_min INTEGER NOT NULL DEFAULT 0,"
+        "  duration_min INTEGER NOT NULL DEFAULT 25,"
+        "  mode TEXT NOT NULL DEFAULT 'work',"
+        "  intent TEXT NOT NULL DEFAULT ''"
+        ")"
+    )
     conn.commit()
     conn.close()
 
@@ -122,3 +133,44 @@ def get_today_events(date_str: str) -> list[Event]:
     ).fetchall()
     conn.close()
     return [Event(id=r[0], ts=r[1], type=r[2], payload=json.loads(r[3])) for r in rows]
+
+
+# --- Plans ---
+
+def get_plans(date_str: str) -> list[dict]:
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT id, date, start_hour, start_min, duration_min, mode, intent "
+        "FROM plans WHERE date = ? ORDER BY start_hour, start_min",
+        (date_str,),
+    ).fetchall()
+    conn.close()
+    return [
+        {"id": r[0], "date": r[1], "start_hour": r[2], "start_min": r[3],
+         "duration_min": r[4], "mode": r[5], "intent": r[6]}
+        for r in rows
+    ]
+
+
+def add_plan(date_str: str, start_hour: int, start_min: int,
+             duration_min: int, mode: str, intent: str) -> dict:
+    conn = _connect()
+    cur = conn.execute(
+        "INSERT INTO plans (date, start_hour, start_min, duration_min, mode, intent) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (date_str, start_hour, start_min, duration_min, mode, intent),
+    )
+    plan_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return {"id": plan_id, "date": date_str, "start_hour": start_hour,
+            "start_min": start_min, "duration_min": duration_min,
+            "mode": mode, "intent": intent}
+
+
+def delete_plan(plan_id: int) -> bool:
+    conn = _connect()
+    cur = conn.execute("DELETE FROM plans WHERE id = ?", (plan_id,))
+    conn.commit()
+    conn.close()
+    return cur.rowcount > 0
