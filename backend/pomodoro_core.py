@@ -70,20 +70,21 @@ def _transition_to(mode: str) -> None:
 
 
 def _complete_phase() -> None:
-    """Handle phase completion: emit event and transition."""
+    """Handle phase completion: stop and wait for manual start."""
     ending_mode = _state.mode
     _emit("phase_completed", _state_snapshot())
 
-    if ending_mode == MODE_WORK:
-        next_mode = _next_mode_after_work()
-        _transition_to(next_mode)
-    elif ending_mode in (MODE_SHORT_BREAK, MODE_LONG_BREAK):
+    # Update cycle index
+    if ending_mode in (MODE_SHORT_BREAK, MODE_LONG_BREAK):
         if ending_mode == MODE_LONG_BREAK:
             _state.cycle_index = 1
         else:
             _state.cycle_index += 1
-        _transition_to(MODE_WORK)
 
+    # Stop and wait for manual start
+    _state.mode = MODE_IDLE
+    _state.status = STATUS_STOPPED
+    _state.remaining_sec = 0
     _save()
 
 
