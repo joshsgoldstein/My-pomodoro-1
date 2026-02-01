@@ -10,8 +10,6 @@ const distractionInput = document.getElementById("distraction-input");
 const eventList = document.getElementById("event-list");
 const distractionCountEl = document.getElementById("distraction-count");
 const buttonsEl = document.getElementById("buttons");
-const timelineEl = document.getElementById("timeline");
-
 let currentMode = "idle";
 let currentStatus = "stopped";
 let currentCycleIndex = 1;
@@ -21,12 +19,6 @@ function fmt(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-}
-
-function fmt12h(h, m) {
-  const ampm = h >= 12 ? "PM" : "AM";
-  const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
-  return h12 + ":" + String(m).padStart(2, "0") + " " + ampm;
 }
 
 function modeDisplay(mode) {
@@ -263,115 +255,10 @@ document.getElementById("btn-save-config").addEventListener("click", async () =>
   refresh();
 });
 
-// --- Vertical day timeline (actual sessions only) ---
-
-const HOUR_HEIGHT = 60; // px per hour
-const TIMELINE_START_HOUR = 6;
-const TIMELINE_END_HOUR = 22;
-
-function buildTimeline(events) {
-  const now = new Date();
-  timelineEl.innerHTML = "";
-
-  const totalHours = TIMELINE_END_HOUR - TIMELINE_START_HOUR;
-  timelineEl.style.height = (totalHours * HOUR_HEIGHT) + "px";
-
-  // Hour grid lines and labels
-  for (let h = TIMELINE_START_HOUR; h <= TIMELINE_END_HOUR; h++) {
-    const line = document.createElement("div");
-    line.className = "tl-hour-line";
-    line.style.top = ((h - TIMELINE_START_HOUR) * HOUR_HEIGHT) + "px";
-    timelineEl.appendChild(line);
-
-    const label = document.createElement("span");
-    label.className = "tl-hour-label";
-    label.style.top = ((h - TIMELINE_START_HOUR) * HOUR_HEIGHT) + "px";
-    label.textContent = fmt12h(h, 0);
-    timelineEl.appendChild(label);
-  }
-
-  // Actual session blocks
-  const spans = buildSpans(events, now);
-  for (const sp of spans) {
-    const startMin = sp.start.getHours() * 60 + sp.start.getMinutes();
-    const endMin = sp.end.getHours() * 60 + sp.end.getMinutes();
-    const top = ((startMin / 60) - TIMELINE_START_HOUR) * HOUR_HEIGHT;
-    const height = Math.max(3, ((endMin - startMin) / 60) * HOUR_HEIGHT);
-    if (top < 0) continue;
-
-    const block = document.createElement("div");
-    block.className = "tl-session tl-session-" + (sp.mode || "work");
-    block.style.top = top + "px";
-    block.style.height = height + "px";
-
-    // Label inside the block
-    const text = document.createElement("span");
-    text.className = "tl-session-text";
-    const startLabel = fmt12h(sp.start.getHours(), sp.start.getMinutes());
-    const dur = Math.round((endMin - startMin));
-    text.textContent = modeDisplay(sp.mode || "work") + " " + dur + "m";
-    block.appendChild(text);
-
-    block.title = modeDisplay(sp.mode || "work") + " " +
-      fmt12h(sp.start.getHours(), sp.start.getMinutes()) + " - " +
-      fmt12h(sp.end.getHours(), sp.end.getMinutes());
-    timelineEl.appendChild(block);
-  }
-
-  // Now marker
-  const nowMin = now.getHours() * 60 + now.getMinutes();
-  const nowTop = ((nowMin / 60) - TIMELINE_START_HOUR) * HOUR_HEIGHT;
-  if (nowTop >= 0 && nowTop <= totalHours * HOUR_HEIGHT) {
-    const marker = document.createElement("div");
-    marker.className = "tl-now";
-    marker.style.top = nowTop + "px";
-    timelineEl.appendChild(marker);
-  }
-}
-
-function buildSpans(events, now) {
-  const spans = [];
-  const sorted = events.slice().reverse();
-  let activeStart = null;
-  let activeMode = null;
-
-  for (const ev of sorted) {
-    const t = new Date(ev.ts);
-    if (ev.type === "started") {
-      activeStart = t;
-      activeMode = ev.payload.mode || "work";
-    } else if (ev.type === "phase_completed" || ev.type === "skipped") {
-      if (activeStart) spans.push({ start: activeStart, end: t, mode: activeMode });
-      activeStart = null;
-      activeMode = null;
-      if (ev.type === "phase_completed") {
-        activeStart = t;
-        const m = ev.payload.mode;
-        activeMode = (m === "work") ? "short_break" : "work";
-      }
-    } else if (ev.type === "stopped") {
-      if (activeStart) spans.push({ start: activeStart, end: t, mode: activeMode });
-      activeStart = null;
-      activeMode = null;
-    }
-  }
-
-  if (activeStart) spans.push({ start: activeStart, end: now, mode: activeMode });
-  return spans;
-}
-
-async function loadTimeline() {
-  try {
-    const events = await api("GET", "/events?limit=200");
-    buildTimeline(events);
-  } catch (e) { /* ignore */ }
-}
-
 // --- Refresh ---
 
 function refresh() {
   loadEvents();
-  loadTimeline();
   loadTodayStats();
 }
 
