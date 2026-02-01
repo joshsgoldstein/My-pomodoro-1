@@ -55,6 +55,13 @@ CMD_DISPATCH = {
         short_break_sec=body.get("short_break_sec"),
         long_break_sec=body.get("long_break_sec"),
         cycles_before_long_break=body.get("cycles_before_long_break"),
+        day_start_hour=body.get("day_start_hour"),
+        day_start_min=body.get("day_start_min"),
+        day_end_hour=body.get("day_end_hour"),
+        day_end_min=body.get("day_end_min"),
+        lunch_hour=body.get("lunch_hour"),
+        lunch_min=body.get("lunch_min"),
+        lunch_duration_min=body.get("lunch_duration_min"),
     ),
 }
 
@@ -146,35 +153,6 @@ def get_today():
         "distractions_count": distractions_count,
         "recent_events": [e.to_dict() for e in recent],
     }
-
-
-# --- Plans ---
-
-@app.get("/plans")
-def get_plans(date: str | None = Query(default=None)):
-    if not date:
-        date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    return db.get_plans(date)
-
-
-@app.post("/plans")
-def create_plan(body: dict[str, Any]):
-    date = body.get("date") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    start_hour = body.get("start_hour")
-    start_min = body.get("start_min", 0)
-    duration_min = body.get("duration_min", 25)
-    mode = body.get("mode", "work")
-    intent = body.get("intent", "")
-    if start_hour is None:
-        raise HTTPException(status_code=400, detail="start_hour is required")
-    return db.add_plan(date, int(start_hour), int(start_min), int(duration_min), mode, intent)
-
-
-@app.delete("/plans/{plan_id}")
-def remove_plan(plan_id: int):
-    if not db.delete_plan(plan_id):
-        raise HTTPException(status_code=404, detail="plan not found")
-    return {"ok": True}
 
 
 # --- Static files (frontend) – mounted last so it doesn't shadow API routes ---

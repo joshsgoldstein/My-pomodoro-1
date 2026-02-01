@@ -16,6 +16,7 @@
       </div>
 
       <div id="settings-panel" class="settings-panel hidden">
+        <h3 class="settings-section-title">Timer</h3>
         <div class="settings-row">
           <label for="cfg-work">Work (min)</label>
           <input type="number" id="cfg-work" min="1" max="120" />
@@ -32,6 +33,30 @@
           <label for="cfg-cycles">Cycles before long break</label>
           <input type="number" id="cfg-cycles" min="1" max="20" />
         </div>
+
+        <h3 class="settings-section-title">Schedule</h3>
+        <div class="settings-row">
+          <label>Work hours</label>
+          <div class="time-range">
+            <select id="cfg-day-start"></select>
+            <span>to</span>
+            <select id="cfg-day-end"></select>
+          </div>
+        </div>
+        <div class="settings-row">
+          <label>Lunch</label>
+          <div class="time-range">
+            <select id="cfg-lunch-time"></select>
+            <span>for</span>
+            <select id="cfg-lunch-duration">
+              <option value="30">30 min</option>
+              <option value="45">45 min</option>
+              <option value="60">60 min</option>
+              <option value="90">90 min</option>
+            </select>
+          </div>
+        </div>
+
         <button id="btn-save-config">Save</button>
       </div>
 
@@ -61,32 +86,9 @@
       <ul id="event-list" class="event-list"></ul>
     </div>
 
-    <!-- RIGHT: Day timeline & planner -->
+    <!-- RIGHT: Day timeline -->
     <div class="col-plan">
-      <div class="plan-header">
-        <h2>Today</h2>
-        <button id="btn-add-plan" class="btn-add-plan" title="Add planned slot">+ Plan</button>
-      </div>
-
-      <div id="add-plan-form" class="add-plan-form hidden">
-        <div class="plan-form-row">
-          <label>Time</label>
-          <input type="number" id="plan-hour" min="0" max="23" placeholder="HH" />
-          <span>:</span>
-          <input type="number" id="plan-min" min="0" max="59" placeholder="MM" value="0" />
-        </div>
-        <div class="plan-form-row">
-          <label>Duration</label>
-          <input type="number" id="plan-duration" min="5" max="120" value="25" />
-          <span>min</span>
-        </div>
-        <div class="plan-form-row">
-          <label>Intent</label>
-          <input type="text" id="plan-intent" placeholder="What to work on" />
-        </div>
-        <button id="btn-save-plan">Add</button>
-      </div>
-
+      <h2>Today</h2>
       <div class="timeline" id="timeline"></div>
     </div>
   </div>
