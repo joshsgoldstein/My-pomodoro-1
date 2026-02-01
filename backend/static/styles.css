@@ -116,6 +116,30 @@ button:hover {
   background: #b22222;
 }
 
+.distraction-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+#btn-distraction {
+  background: #8b5e1a;
+  padding: 0.5rem 1.25rem;
+}
+
+#btn-distraction:hover {
+  background: #b37a22;
+}
+
+.distraction-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #cc8844;
+  min-width: 1.5em;
+}
+
 .note-section {
   display: flex;
   gap: 0.5rem;

@@ -276,3 +276,11 @@ def add_note(message: str) -> Event:
     }
     event = _emit("note_added", payload)
     return event
+
+
+def add_distraction(message: str = "") -> Event:
+    tick()
+    payload = {**_state_snapshot()}
+    if message:
+        payload["message"] = message
+    return _emit("distraction", payload)

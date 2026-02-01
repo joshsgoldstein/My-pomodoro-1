@@ -79,6 +79,15 @@ def post_note(body: dict[str, Any]):
     return event.to_dict()
 
 
+# --- Distractions ---
+
+@app.post("/distractions")
+def post_distraction(body: dict[str, Any] = {}):
+    message = body.get("message", "").strip() if body else ""
+    event = core.add_distraction(message)
+    return event.to_dict()
+
+
 # --- Events ---
 
 @app.get("/events")
@@ -101,6 +110,7 @@ def get_today():
     work_completed = 0
     break_completed = 0
     notes_count = 0
+    distractions_count = 0
 
     for e in events:
         if e.type == "phase_completed":
@@ -111,6 +121,8 @@ def get_today():
                 break_completed += 1
         elif e.type == "note_added":
             notes_count += 1
+        elif e.type == "distraction":
+            distractions_count += 1
 
     # Estimate focus_sec from completed work sessions
     # Each completed work session = config work_sec (approximate)
@@ -124,6 +136,7 @@ def get_today():
         "work_sessions_completed": work_completed,
         "break_sessions_completed": break_completed,
         "notes_count": notes_count,
+        "distractions_count": distractions_count,
         "recent_events": [e.to_dict() for e in recent],
     }
 

@@ -6,6 +6,7 @@ const intentEl = document.getElementById("intent-label");
 const intentInput = document.getElementById("intent-input");
 const noteInput = document.getElementById("note-input");
 const eventList = document.getElementById("event-list");
+const distractionCountEl = document.getElementById("distraction-count");
 
 function fmt(sec) {
   const m = Math.floor(sec / 60);
@@ -45,7 +46,9 @@ async function loadEvents() {
       const li = document.createElement("li");
       const time = ev.ts.substring(11, 19);
       let detail = "";
-      if (ev.type === "note_added") {
+      if (ev.type === "distraction") {
+        detail = ev.payload.message || "distraction";
+      } else if (ev.type === "note_added") {
         detail = ev.payload.message || "";
       } else if (ev.type === "started" && ev.payload.intent) {
         detail = ev.payload.intent;
@@ -91,6 +94,12 @@ document.getElementById("btn-stop").addEventListener("click", async () => {
   loadEvents();
 });
 
+document.getElementById("btn-distraction").addEventListener("click", async () => {
+  await api("POST", "/distractions", {});
+  loadDistractionCount();
+  loadEvents();
+});
+
 document.getElementById("btn-note").addEventListener("click", async () => {
   const msg = noteInput.value.trim();
   if (!msg) return;
@@ -103,8 +112,19 @@ noteInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") document.getElementById("btn-note").click();
 });
 
-// Poll state every second, refresh events every 5 seconds
+async function loadDistractionCount() {
+  try {
+    const data = await api("GET", "/today");
+    distractionCountEl.textContent = data.distractions_count || 0;
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+// Poll state every second, refresh events and distraction count every 5 seconds
 setInterval(pollState, 1000);
 setInterval(loadEvents, 5000);
+setInterval(loadDistractionCount, 5000);
 pollState();
 loadEvents();
+loadDistractionCount();
