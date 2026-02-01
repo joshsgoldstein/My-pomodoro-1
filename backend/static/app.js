@@ -140,10 +140,10 @@ async function pollState() {
 // --- Events ---
 
 function fmtEventTime(ts) {
-  // ts is ISO like "2025-01-01T14:30:45..."
-  const h = parseInt(ts.substring(11, 13), 10);
-  const m = ts.substring(14, 16);
-  const s = ts.substring(17, 19);
+  const d = new Date(ts);
+  const h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const s = String(d.getSeconds()).padStart(2, "0");
   const ampm = h >= 12 ? "PM" : "AM";
   const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
   return h12 + ":" + m + ":" + s + " " + ampm;
