@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Pomodoro</h1>
+
+    <div id="timer" class="timer">00:00</div>
+    <div id="mode-label" class="mode-label">idle</div>
+    <div id="status-label" class="status-label">stopped</div>
+    <div id="cycle-label" class="cycle-label">Cycle 1</div>
+    <div id="intent-label" class="intent-label"></div>
+
+    <div class="controls">
+      <input type="text" id="intent-input" placeholder="Intent (optional)" />
+      <div class="buttons">
+        <button id="btn-start-work">Start Work</button>
+        <button id="btn-start-break">Start Break</button>
+        <button id="btn-toggle">Toggle</button>
+        <button id="btn-skip">Skip</button>
+        <button id="btn-stop">Stop</button>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <input type="text" id="note-input" placeholder="Add a note..." />
+      <button id="btn-note">Add Note</button>
+    </div>
+
+    <h2>History</h2>
+    <ul id="event-list" class="event-list"></ul>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

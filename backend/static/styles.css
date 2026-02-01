@@ -1,0 +1,169 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.container {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+  color: #8888cc;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.timer {
+  font-size: 5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.25rem;
+  color: #ffffff;
+}
+
+.mode-label {
+  font-size: 1.1rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.status-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.cycle-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.15rem;
+}
+
+.intent-label {
+  font-size: 0.95rem;
+  color: #cc8844;
+  min-height: 1.4em;
+  margin-bottom: 1.5rem;
+}
+
+.controls {
+  margin-bottom: 1.5rem;
+}
+
+.controls input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #0f3460;
+  color: #e0e0e0;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: #1a5276;
+}
+
+#btn-start-work {
+  background: #1b8a2e;
+}
+
+#btn-start-work:hover {
+  background: #22a838;
+}
+
+#btn-stop {
+  background: #8b1a1a;
+}
+
+#btn-stop:hover {
+  background: #b22222;
+}
+
+.note-section {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.note-section input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+
+h2 {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.event-list {
+  list-style: none;
+  text-align: left;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.event-list li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #222;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.event-list .event-type {
+  color: #8888cc;
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+
+.event-list .event-time {
+  color: #555;
+  margin-right: 0.4rem;
+}
+
+.event-list .event-detail {
+  color: #aaa;
+}
