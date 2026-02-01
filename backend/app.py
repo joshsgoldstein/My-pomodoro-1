@@ -88,6 +88,13 @@ def post_distraction(body: dict[str, Any] = {}):
     return event.to_dict()
 
 
+# --- Config ---
+
+@app.get("/config")
+def get_config():
+    return db.load_config().to_dict()
+
+
 # --- Events ---
 
 @app.get("/events")
