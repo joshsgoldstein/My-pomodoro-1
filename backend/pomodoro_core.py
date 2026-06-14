@@ -72,7 +72,14 @@ def _transition_to(mode: str) -> None:
 def _complete_phase() -> None:
     """Handle phase completion: stop and wait for manual start."""
     ending_mode = _state.mode
-    _emit("phase_completed", _state_snapshot())
+    snapshot = _state_snapshot()
+    if _state.active_task_id is not None:
+        snapshot["task_id"] = _state.active_task_id
+    _emit("phase_completed", snapshot)
+
+    # A completed work session counts toward its assigned task.
+    if ending_mode == MODE_WORK and _state.active_task_id is not None:
+        db.increment_task_spent(_state.active_task_id)
 
     # Update cycle index
     if ending_mode in (MODE_SHORT_BREAK, MODE_LONG_BREAK):
@@ -145,7 +152,11 @@ def get_state() -> dict:
     return _state.to_dict()
 
 
-def cmd_start(mode: str = MODE_WORK, intent: str | None = None) -> dict:
+def cmd_start(
+    mode: str = MODE_WORK,
+    intent: str | None = None,
+    task_id: int | None = None,
+) -> dict:
     tick()
 
     if mode not in (MODE_WORK, MODE_SHORT_BREAK, MODE_LONG_BREAK):
@@ -157,6 +168,18 @@ def cmd_start(mode: str = MODE_WORK, intent: str | None = None) -> dict:
     _state.started_at = _now_iso()
     _state._last_tick = _mono()
 
+    # A task can drive the work session: its title becomes the intent.
+    if mode == MODE_WORK:
+        if task_id is not None:
+            task = db.get_task(task_id)
+            if task is not None:
+                _state.active_task_id = task.id
+                if not intent:
+                    intent = task.title
+        # else keep whatever task was already active
+    else:
+        _state.active_task_id = None
+
     if intent is not None and intent != "":
         _state.intent = intent
 
@@ -165,6 +188,8 @@ def cmd_start(mode: str = MODE_WORK, intent: str | None = None) -> dict:
     payload: dict = {"mode": mode, "cycle_index": _state.cycle_index}
     if _state.intent:
         payload["intent"] = _state.intent
+    if _state.active_task_id is not None:
+        payload["task_id"] = _state.active_task_id
 
     _emit("started", payload)
     _save()
@@ -233,6 +258,7 @@ def cmd_stop() -> dict:
     _state.remaining_sec = 0
     _state.cycle_index = 1
     _state.intent = ""
+    _state.active_task_id = None
     _state.started_at = None
     _save()
     return _state.to_dict()
@@ -251,6 +277,7 @@ def cmd_set_config(
     short_break_sec: int | None = None,
     long_break_sec: int | None = None,
     cycles_before_long_break: int | None = None,
+    daily_goal_pomodoros: int | None = None,
 ) -> dict:
     global _config
     if work_sec is not None:
@@ -261,6 +288,8 @@ def cmd_set_config(
         _config.long_break_sec = long_break_sec
     if cycles_before_long_break is not None:
         _config.cycles_before_long_break = cycles_before_long_break
+    if daily_goal_pomodoros is not None:
+        _config.daily_goal_pomodoros = daily_goal_pomodoros
 
     _state.cycles_before_long_break = _config.cycles_before_long_break
     db.save_config(_config)

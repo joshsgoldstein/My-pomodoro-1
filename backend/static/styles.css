@@ -16,13 +16,59 @@ body {
 
 /* --- Layout --- */
 
-.layout {
-  max-width: 480px;
+.app {
+  max-width: 560px;
   width: 100%;
+  text-align: center;
 }
 
-.col-timer {
-  text-align: center;
+/* --- Tabs --- */
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #2a2a44;
+}
+
+.tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #888;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+}
+
+.tab:hover {
+  background: none;
+  color: #ccc;
+}
+
+.tab.active {
+  color: #fff;
+  border-bottom-color: #8888cc;
+}
+
+.panel.hidden {
+  display: none;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 1rem;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.empty {
+  color: #666;
+  font-size: 0.85rem;
+  padding: 1rem 0;
 }
 
 /* --- Header --- */
@@ -305,5 +351,323 @@ h2 {
 
 .event-list .event-detail {
   color: #aaa;
+}
+
+/* --- Goal progress (timer tab) --- */
+
+.goal {
+  margin-bottom: 0.75rem;
+}
+
+.goal-bar {
+  height: 8px;
+  background: #16213e;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #2a2a44;
+}
+
+.goal-fill {
+  height: 100%;
+  width: 0%;
+  background: #8888cc;
+  transition: width 0.4s ease;
+}
+
+.goal-fill.goal-done {
+  background: #1b8a2e;
+}
+
+.goal-label {
+  font-size: 0.8rem;
+  color: #8888cc;
+  margin-top: 0.3rem;
+  min-height: 1.1em;
+}
+
+/* --- Task select on timer --- */
+
+.task-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+}
+
+/* --- Tasks tab --- */
+
+.task-add {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.task-add input[type="text"] {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #16213e;
+  color: #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.task-add input[type="number"] {
+  width: 60px;
+  padding: 0.5rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #16213e;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+.task-list {
+  list-style: none;
+  text-align: left;
+}
+
+.task {
+  background: #16213e;
+  border: 1px solid #2a2a44;
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0.6rem;
+}
+
+.task-done {
+  opacity: 0.55;
+}
+
+.task-done .task-title {
+  text-decoration: line-through;
+}
+
+.task-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.task-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.task-title {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+
+.task-count {
+  font-size: 0.8rem;
+  color: #8888cc;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-count.over {
+  color: #cc8844;
+}
+
+.task-bar {
+  height: 5px;
+  background: #0e1424;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.task-fill {
+  height: 100%;
+  background: #8888cc;
+}
+
+.task-fill.over {
+  background: #cc8844;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.task-actions button {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+/* --- Plan tab --- */
+
+.planner-config {
+  background: #16213e;
+  border: 1px solid #2a2a44;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.planner-config .settings-row label {
+  font-size: 0.82rem;
+  color: #aaa;
+}
+
+.planner-config input {
+  width: 90px;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+#btn-generate-plan {
+  width: 100%;
+  margin-top: 0.6rem;
+}
+
+.plan-blocks {
+  text-align: left;
+}
+
+.plan-block {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.4rem;
+  border-radius: 6px;
+  background: #16213e;
+  border-left: 3px solid #2a2a44;
+  font-size: 0.85rem;
+}
+
+.plan-block.block-work { border-left-color: #1b8a2e; }
+.plan-block.block-short_break { border-left-color: #0f3460; }
+.plan-block.block-long_break { border-left-color: #5a3a8b; }
+.plan-block.block-lunch { border-left-color: #8b5e1a; }
+
+.plan-block.status-done { opacity: 0.55; }
+
+.block-time {
+  color: #888;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.block-type {
+  color: #8888cc;
+  text-transform: capitalize;
+  min-width: 5.5em;
+}
+
+.block-intent {
+  color: #cc8844;
+  flex: 1;
+}
+
+.block-task {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  max-width: 55%;
+}
+
+.block-start {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* --- Stats tab --- */
+
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: #16213e;
+  border: 1px solid #2a2a44;
+  border-radius: 8px;
+  padding: 0.8rem 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: #888;
+  margin-top: 0.2rem;
+}
+
+.stats-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.3rem;
+  height: 180px;
+  padding-top: 0.5rem;
+}
+
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-bar-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.chart-bar {
+  width: 70%;
+  min-height: 2px;
+  background: #4a4a7a;
+  border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+}
+
+.chart-bar.met {
+  background: #1b8a2e;
+}
+
+.chart-count {
+  font-size: 0.7rem;
+  color: #8888cc;
+  height: 1em;
+  margin-top: 0.2rem;
+}
+
+.chart-label {
+  font-size: 0.65rem;
+  color: #666;
+  margin-top: 0.2rem;
+  white-space: nowrap;
 }
 

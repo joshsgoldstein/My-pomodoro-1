@@ -2,6 +2,20 @@
 
 Local-first Pomodoro timer with REST API, event logging, and a minimal web UI.
 
+Beyond the core timer, the app includes a full time-management toolkit:
+
+- **Tasks with pomodoro estimates** — list your work, estimate each task in
+  pomodoros, run the timer against a task, and watch actual vs. estimated
+  effort so your planning gets sharper over time.
+- **Daily goal & streaks** — set a daily pomodoro target; the timer shows a
+  progress bar, and the stats view tracks your current streak.
+- **Day planner (schedule-first)** — generate a grid of pomodoro blocks for
+  your work day, assign tasks to work slots, and start any block to run it.
+- **Stats & insights** — a 14-day dashboard of pomodoros, focus time,
+  distractions, streak, and your best day.
+
+The UI is organized into four tabs: **Timer**, **Tasks**, **Plan**, and **Stats**.
+
 ## Prerequisites
 
 - **Docker** (with Docker Compose): [Install Docker](https://docs.docker.com/get-docker/)
@@ -67,7 +81,36 @@ Base URL: `http://localhost:8000`
 | POST | `/cmd` | Send a command |
 | POST | `/notes` | Add a timestamped note |
 | GET | `/events?limit=100&since=ISO_TS` | Event log, newest first |
-| GET | `/today` | Today's summary (focus time, session counts, notes, recent events) |
+| GET | `/today` | Today's summary (focus time, session counts, goal progress, active task, recent events) |
+| GET | `/tasks?include_done=true` | List tasks |
+| POST | `/tasks` | Create a task (`{"title": ..., "estimate_pomodoros": 3}`) |
+| PATCH | `/tasks/{id}` | Update title/estimate/status (`"active"`/`"done"`) |
+| DELETE | `/tasks/{id}` | Delete a task |
+| GET | `/stats?days=14` | Multi-day stats: per-day series, totals, streak, best day |
+| GET | `/planner/config` | Day-planner config (work hours, session/break lengths, lunch) |
+| POST | `/planner/config` | Update planner config |
+| GET | `/plan?date=YYYY-MM-DD` | Get (or generate) the day plan |
+| POST | `/plan/generate` | Regenerate the plan, preserving assignments where possible |
+| POST | `/plan/block` | Assign a task/intent/status to a block (`{"index": 0, "task_id": 2}`) |
+| POST | `/plan/start` | Start the timer for a plan block (`{"index": 0}`) |
+
+### Tasks & estimates
+
+Each task carries an estimate in pomodoros and a running count of pomodoros
+spent. Starting a work session with `{"type": "start", "mode": "work",
+"task_id": 2}` makes that task the *active task* — its title becomes the
+session intent, and completing the work phase increments its `spent_pomodoros`.
+
+### Daily goal
+
+`set_config` accepts `daily_goal_pomodoros`. The Timer tab shows a progress bar
+toward the goal, and `/today` returns `goal_met` and `goal_remaining`.
+
+### Day planner
+
+The planner turns a day config into time blocks (work / breaks / lunch). Assign
+tasks to work blocks, then `POST /plan/start` runs a block — the intent and task
+come from the block rather than a separate input.
 
 ### Commands (`POST /cmd`)
 
@@ -117,6 +160,7 @@ curl -X POST http://localhost:8000/notes \
   "cycle_index": 1,
   "cycles_before_long_break": 4,
   "intent": "draft intro paragraph",
+  "active_task_id": 2,
   "started_at": "2026-01-31T10:00:00+00:00",
   "updated_at": "2026-01-31T10:01:17+00:00"
 }
@@ -130,6 +174,7 @@ curl -X POST http://localhost:8000/notes \
 | `short_break_sec` | 300 (5 min) | Short break duration |
 | `long_break_sec` | 900 (15 min) | Long break duration |
 | `cycles_before_long_break` | 4 | Work sessions before a long break |
+| `daily_goal_pomodoros` | 8 | Target completed work sessions per day |
 
 Change at runtime via `POST /cmd` with `{"type": "set_config", ...}`.
 
@@ -141,7 +186,8 @@ pomodoro/
   backend/
     app.py              # FastAPI routes
     pomodoro_core.py    # State machine + timing logic
-    db.py               # SQLite persistence
+    planner.py          # Day-planner block generation
+    db.py               # SQLite persistence (state, events, tasks, plans)
     models.py           # Data models
     requirements.txt
     Dockerfile
